@@ -1,0 +1,31 @@
+name: Update Firestore
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '0 */6 * * *' # 6시간마다 실행
+
+jobs:
+  update-firestore:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Change gradlew permissions
+        run: chmod +x gradlew
+
+      - name: Install dependencies
+        run: ./gradlew build --no-daemon
+
+      - name: Run tests
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+        run: ./gradlew test --no-daemon
